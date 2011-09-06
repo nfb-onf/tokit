@@ -1,0 +1,15 @@
+[ {"pk": 1,
+  "model": "tokit.TokenPermission", 
+  "fields": {
+   "name": "Can get datat from the API", 
+   "codename": "can_get_from_api"
+  }
+ }, 
+ {"pk":2,
+  "model": "tokit.TokenPermission", 
+  "fields": {
+   "name": "Can post updated info to the API", 
+   "codename": "can_post_to_api"
+  }
+ }
+]
