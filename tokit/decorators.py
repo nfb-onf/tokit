@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2011, National Film Board of Canada - Office National du Film du Canada
 
 __author__="Stephane Jolicoeur-Fidelia (s.jolicoeur@nfb.ca)"
 __date__="24 janvier 2011"
-__copyright__="Copyright 2011 Stephane Jolicoeur-Fidelia "
-__license__="NFB License"
-__version__="0.0.5"
 
 from django.http import HttpResponse
 from django.utils import simplejson

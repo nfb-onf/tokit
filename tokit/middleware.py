@@ -1,4 +1,6 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# Copyright (c) 2011, National Film Board of Canada - Office National du Film du Canada
+
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse

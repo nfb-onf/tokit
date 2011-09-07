@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright (c) 2011, National Film Board of Canada - Office National du Film du Canada
 
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -11,7 +12,6 @@ class Dummy(object) :
     pass
 
 class DecoratorsTest(TestCase) :
-    #/Users/sjolicoeur/Dev/nfb_tube2/nfb_api/decorators/__init__.py
     def setUp(self):
         self.key_owner = User(username="api_user")
         self.key_owner.save()
