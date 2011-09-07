@@ -4,7 +4,7 @@ setup(
     version = "0.1",
     packages=find_packages(),
     package_data = {'fixtures':['*.json']},
-    install_requires =['South==0.7.1'],
+    install_requires =[],
     author = "NFB-ONF",
     author_email = "DevEquipeWeb@nfb.ca",
     description = "Tokit - Django application which manage to generation and validation of unique keys(tokens).",

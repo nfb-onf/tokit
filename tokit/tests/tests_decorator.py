@@ -12,6 +12,7 @@ class Dummy(object) :
     pass
 
 class DecoratorsTest(TestCase) :
+    fixtures = ['tokit/fixtures/initial_data.json']
     def setUp(self):
         self.key_owner = User(username="api_user")
         self.key_owner.save()

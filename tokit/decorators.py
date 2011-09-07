@@ -7,7 +7,6 @@ __date__="24 janvier 2011"
 from django.http import HttpResponse
 from django.utils import simplejson
 
-from util.json import NFBDjangoJSONEncoder
 from tokit.models import Token
 
 def generate_json_error_msg(status, msg, key, method):
@@ -16,7 +15,7 @@ def generate_json_error_msg(status, msg, key, method):
                     "status" : status,
                     'API_KEY' : key,
                     'method' : method,
-                }, cls=NFBDjangoJSONEncoder)
+                })
 
 def get_api_key(aKey) :
     try :

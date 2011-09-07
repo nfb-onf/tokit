@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from tokit.models import Token, TokenPermission
 
 class TokenModelTest(TestCase):
+    fixtures = ['tokit/fixtures/initial_data.json']
     def setUp(self):
         self.key_owner = User(username="api_user")
         self.key_owner.save()
@@ -77,6 +78,7 @@ class TokenModelTest(TestCase):
 
 
 class TokenPermissionModelTest(TestCase):
+    fixtures = ['tokit/fixtures/initial_data.json']
     def test_fixture_load_correctly(self):
         try:
             get_perm = TokenPermission.objects.get(codename='can_get_from_api')
