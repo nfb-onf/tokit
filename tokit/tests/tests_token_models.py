@@ -89,5 +89,5 @@ class TokenPermissionModelTest(TestCase):
             post_perm = TokenPermission.objects.get(codename='can_post_to_api')
         except ObjectDoesNotExist:
             assert False, 'Post permission not insert'
-
+        
 	

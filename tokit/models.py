@@ -4,18 +4,111 @@
 import uuid
 import datetime
 
-from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
+from django.core.cache import cache
+from django.db import models
+from django.db.models.signals import post_save, post_delete
 
 TOKIT_DB = getattr(settings, "TOKIT_DB", "default")
 
+class TokitPathManager(models.Manager):
+    def is_active(self):
+        return bool(self.all().count())
+
+    def is_path(self, req_path):
+        for path in self.all():
+            if req_path.startswith(str(path)):
+                return True
+        return False
+
+class TokitPath(models.Model):
+    path_re = models.CharField(max_length=255
+                               ,unique=True
+                               ,help_text="")
+    CACHE = {}
+    
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.path_re
+    
+    def __unicode__(self):
+        return unicode(self.__str__())
+        
+    @staticmethod
+    def is_key_required_for(req_path):
+        key = 'tokit_path_%s' % req_path.replace('/', "_")
+        is_key_required = TokitPath.CACHE.get(key)
+        if is_key_required != None:
+            return is_key_required
+        is_key_required = TokitPath.mode_manager().is_key_required_for(req_path)
+        TokitPath.CACHE[key] = is_key_required
+        return is_key_required
+
+    @staticmethod
+    def secure_mode():
+        if SpecificPathValidation.objects.is_active():
+            return 'specific'
+        return 'global'
+
+    @staticmethod
+    def mode_manager():
+        if SpecificPathValidation.objects.is_active():
+            return SpecificPathValidation
+        return GlobalPathException
+
+    @staticmethod
+    def is_path_recorded(req_path, orm_objects):
+        for path in orm_objects.all():
+            if req_path.startswith(str(path)):
+                return True
+        return False
+
+def clean_tokit_path_cache(sender, instance, **kwargs):
+    action = kwargs.get('action', 'post_save')
+    del TokitPath.CACHE
+    TokitPath.CACHE = {}
+
+        
+class GlobalPathException(TokitPath):
+    objects = TokitPathManager()
+
+    @staticmethod
+    def is_key_required_for(req_path):
+        return not TokitPath.is_path_recorded(req_path, GlobalPathException.objects)
+    
+    def save(self):
+        if SpecificPathValidation.objects.is_active():
+            return None
+        super(GlobalPathException, self).save()
+
+class SpecificPathValidation(TokitPath):
+    objects = TokitPathManager()
+
+    @staticmethod
+    def is_key_required_for(req_path):
+        return TokitPath.is_path_recorded(req_path, SpecificPathValidation.objects)
+        
+    def save(self):
+        if GlobalPathException.objects.is_active():
+            return None
+        super(SpecificPathValidation, self).save()
+
+            
+post_save.connect(clean_tokit_path_cache, sender=GlobalPathException)
+post_save.connect(clean_tokit_path_cache, sender=SpecificPathValidation)
+post_delete.connect(clean_tokit_path_cache, sender=GlobalPathException)
+post_delete.connect(clean_tokit_path_cache, sender=SpecificPathValidation)
+
+
+# ==== Token        
 class TokenPermissionManager(models.Manager):
     def get_query_set(self):
         return super(TokenPermissionManager, self).get_query_set().using(TOKIT_DB)
-
 
 class TokenPermission(models.Model):
     name = models.CharField(max_length=255,unique=True)
@@ -129,3 +222,14 @@ class TokenAccessLog(models.Model):
 
     def __unicode__(self):
         return u"API KEY :  %s was used %s times" % (self.key.__str__(), count)
+
+
+class ClassName(object):
+    """
+    """
+    
+    def __init__(self, ):
+        """
+        """
+        
+        

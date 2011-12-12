@@ -6,7 +6,7 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import simplejson
 
-from tokit.models import Token
+from tokit.models import Token, TokitPath
 
 
 def get_api_key(aKey) :
@@ -27,14 +27,13 @@ def extract_api_key(request):
 
 class APIAuthMiddleware(object):
     def process_request(self, request):
-        request_api_key = extract_api_key(request)
-        if request.path.startswith("/admin") :
+        if not TokitPath.is_key_required_for(request.path):
             return None
+
+        request_api_key = extract_api_key(request)
         if request_api_key :
             key = get_api_key(request_api_key)
             if key and key.has_access() :
                 return None
 
         return HttpResponse("Forbidden", status = 401)
-
-
