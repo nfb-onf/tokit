@@ -3,6 +3,7 @@
 
 import uuid
 import datetime
+from sets import Set
 
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
@@ -18,8 +19,7 @@ class TokitPathManager(models.Manager):
     def is_active(self):
         return bool(self.all().count())
 
-class TokitPath(models.Model):
-    """
+TOKITPATHDOC = """
     Manage security by token for the middleware
     
     It selects the appropriate business rule to validate if a path should be secured
@@ -27,13 +27,17 @@ class TokitPath(models.Model):
     If there is at least one entry in GlobalPathException and none in SpecificPathValidation, the rule is to validate all but those set in that table.
 
     If there is at least one entry in SpecificPathValidation, the rule is to validate only those that table.
+
     By default it is set to validate all but /admin
     
     """
+
+class TokitPath(models.Model):
+    __doc__ = TOKITPATHDOC
     path = models.CharField(max_length=255
                                ,unique=True
                                ,help_text="")
-    CACHE = {}
+    CACHE_KEYS = Set([])
     
     class Meta:
         abstract = True
@@ -43,15 +47,16 @@ class TokitPath(models.Model):
     
     def __unicode__(self):
         return unicode(self.__str__())
-        
+    
     @staticmethod
     def is_key_required_for(req_path):
         key = 'tokit_path_%s' % req_path.replace('/', "_")
-        is_key_required = TokitPath.CACHE.get(key)
+        is_key_required = cache.get(key)
         if is_key_required != None:
             return is_key_required
         is_key_required = TokitPath.mode_manager().is_key_required_for(req_path)
-        TokitPath.CACHE[key] = is_key_required
+        cache.set(key, is_key_required, 3600)
+        TokitPath.CACHE_KEYS.update([key])
         return is_key_required
 
     @staticmethod
@@ -69,11 +74,12 @@ class TokitPath(models.Model):
 
 def clean_tokit_path_cache(sender, instance, **kwargs):
     action = kwargs.get('action', 'post_save')
-    del TokitPath.CACHE
-    TokitPath.CACHE = {}
-
+    map(lambda key: cache.delete(key), TokitPath.CACHE_KEYS)
+    del TokitPath.CACHE_KEYS
+    TokitPath.CACHE_KEYS = Set([])
         
 class GlobalPathException(TokitPath):
+    __doc__ = TOKITPATHDOC
     objects = TokitPathManager()
 
     @staticmethod
@@ -86,6 +92,7 @@ class GlobalPathException(TokitPath):
         super(GlobalPathException, self).save()
 
 class SpecificPathValidation(TokitPath):
+    __doc__ = TOKITPATHDOC
     objects = TokitPathManager()
 
     @staticmethod
@@ -94,13 +101,11 @@ class SpecificPathValidation(TokitPath):
         
     def save(self):
         super(SpecificPathValidation, self).save()
-
             
 post_save.connect(clean_tokit_path_cache, sender=GlobalPathException)
 post_save.connect(clean_tokit_path_cache, sender=SpecificPathValidation)
 post_delete.connect(clean_tokit_path_cache, sender=GlobalPathException)
 post_delete.connect(clean_tokit_path_cache, sender=SpecificPathValidation)
-
 
 # ==== Token        
 class TokenPermissionManager(models.Manager):

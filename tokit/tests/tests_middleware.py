@@ -38,7 +38,6 @@ class TokenModelTest(TestCase):
     def test_tokit_path_should_not_let_adding_new_globalexception_when_the_is_specificPathValidation(self):
         SpecificPathValidation(path="/events").save()
         self.assertEqual(SpecificPathValidation.objects.all().count(), 1)
-        print('all blobal path : %s' % GlobalPathException.objects.all())
         self.assertEqual(GlobalPathException.objects.all().count(), 1)
         self.clear_paths()
         SpecificPathValidation(path="/events").save()
