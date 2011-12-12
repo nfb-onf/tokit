@@ -19,10 +19,9 @@ class TokenModelTest(TestCase):
         self.key_invalid = Token(description='test key invalid', owner=self.key_owner)
         self.token.save()
         self.key_invalid.save()
-        self.create_paths()
 
     def create_paths(self):
-        GlobalPathException(path_re="/admin/").save()
+        GlobalPathException(path="/admin/").save()
         
     def tearDown(self):
         self.clear_paths()
@@ -36,18 +35,19 @@ class TokenModelTest(TestCase):
         self.assertTrue(GlobalPathException.objects.is_active())
         self.assertFalse(SpecificPathValidation.objects.is_active())
 
-    def test_tokit_path_should_only_manage_one_type_of_security_all_or_selected_path(self):
-        SpecificPathValidation(path_re="/events").save()
-        self.assertEqual(SpecificPathValidation.objects.all().count(), 0)
+    def test_tokit_path_should_not_let_adding_new_globalexception_when_the_is_specificPathValidation(self):
+        SpecificPathValidation(path="/events").save()
+        self.assertEqual(SpecificPathValidation.objects.all().count(), 1)
+        print('all blobal path : %s' % GlobalPathException.objects.all())
         self.assertEqual(GlobalPathException.objects.all().count(), 1)
         self.clear_paths()
-        SpecificPathValidation(path_re="/events").save()
-        GlobalPathException(path_re="/admin/").save()
+        SpecificPathValidation(path="/events").save()
+        GlobalPathException(path="/admin/").save()
         self.assertEqual(SpecificPathValidation.objects.all().count(), 1)
         self.assertEqual(GlobalPathException.objects.all().count(), 0)
           
     def test_middleware_should_let_access_path_that_were_set_unprotected(self):
-        GlobalPathException(path_re="/crossdomain.xml").save()
+        GlobalPathException(path="/crossdomain.xml").save()
         admin = self.c.get("/admin/")
         self.assertEqual(admin.status_code, 200)
         admin_subpath = self.c.get("/admin/users/")
@@ -57,7 +57,7 @@ class TokenModelTest(TestCase):
         
     def test_middleware_should_let_access_path_under_the_one_define_only(self):
         self.clear_paths()
-        GlobalPathException(path_re="/admin/users").save()
+        GlobalPathException(path="/admin/users").save()
         admin = self.c.get("/admin/")
         # should also failed if cache isnt working correctly
         self.assertEqual(admin.status_code, 401)
@@ -66,7 +66,7 @@ class TokenModelTest(TestCase):
 
     def test_middleware_should_only_restricted_access_to_specified_path_when_SpecificPathValidation_is_active(self):
         self.clear_paths()
-        SpecificPathValidation(path_re="/events").save()
+        SpecificPathValidation(path="/events").save()
         self.assertEqual(SpecificPathValidation.objects.all().count(), 1)
         admin_subpath = self.c.get("/admin/users/")
         self.assertEqual(admin_subpath.status_code, 200)

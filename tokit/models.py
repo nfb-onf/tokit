@@ -18,14 +18,19 @@ class TokitPathManager(models.Manager):
     def is_active(self):
         return bool(self.all().count())
 
-    def is_path(self, req_path):
-        for path in self.all():
-            if req_path.startswith(str(path)):
-                return True
-        return False
-
 class TokitPath(models.Model):
-    path_re = models.CharField(max_length=255
+    """
+    Manage security by token for the middleware
+    
+    It selects the appropriate business rule to validate if a path should be secured
+
+    If there is at least one entry in GlobalPathException and none in SpecificPathValidation, the rule is to validate all but those set in that table.
+
+    If there is at least one entry in SpecificPathValidation, the rule is to validate only those that table.
+    By default it is set to validate all but /admin
+    
+    """
+    path = models.CharField(max_length=255
                                ,unique=True
                                ,help_text="")
     CACHE = {}
@@ -34,7 +39,7 @@ class TokitPath(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.path_re
+        return self.path
     
     def __unicode__(self):
         return unicode(self.__str__())
@@ -48,12 +53,6 @@ class TokitPath(models.Model):
         is_key_required = TokitPath.mode_manager().is_key_required_for(req_path)
         TokitPath.CACHE[key] = is_key_required
         return is_key_required
-
-    @staticmethod
-    def secure_mode():
-        if SpecificPathValidation.objects.is_active():
-            return 'specific'
-        return 'global'
 
     @staticmethod
     def mode_manager():
@@ -94,8 +93,6 @@ class SpecificPathValidation(TokitPath):
         return TokitPath.is_path_recorded(req_path, SpecificPathValidation.objects)
         
     def save(self):
-        if GlobalPathException.objects.is_active():
-            return None
         super(SpecificPathValidation, self).save()
 
             

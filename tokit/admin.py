@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-from tokit.models import Token, TokenPermission
+from tokit.models import Token, TokenPermission, GlobalPathException, SpecificPathValidation
 
 class TokenAdmin(admin.ModelAdmin):
     list_display = ('key','description','access_count','request_per_day_limit','is_valid', 'is_internal')
@@ -15,3 +15,12 @@ admin.site.register(Token,TokenAdmin)
 class TokenPermissionAdmin(admin.ModelAdmin):
     pass
 admin.site.register(TokenPermission, TokenPermissionAdmin)
+
+
+class GlobalPathExceptionAdmin(admin.ModelAdmin):
+    pass
+admin.site.register(GlobalPathException, GlobalPathExceptionAdmin)
+
+class SpecificPathValidationAdmin(admin.ModelAdmin):
+    pass
+admin.site.register(SpecificPathValidation, SpecificPathValidationAdmin)

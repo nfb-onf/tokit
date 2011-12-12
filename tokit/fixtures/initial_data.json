@@ -11,5 +11,11 @@
    "name": "Can post updated info to the API", 
    "codename": "can_post_to_api"
   }
+ },
+ {"pk": 1,
+  "model": "tokit.GlobalPathException",
+  "fields": {
+   "path": "/admin"
+  }
  }
 ]
