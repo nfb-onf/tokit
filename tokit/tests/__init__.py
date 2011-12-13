@@ -5,3 +5,4 @@
 from tests_decorator import *
 from tests_token_models import *
 from tests_middleware import *
+from tests_key_manager import *

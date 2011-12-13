@@ -14,7 +14,9 @@ def extract_api_key(request):
     if hasattr(request, "META"):
         if request.META.get("HTTP_API_KEY") : # HTTP is dynamicaly added by django !@#$$!
             return request.META.get("HTTP_API_KEY")
-    method = getattr(request, request.method)
-    if method.get("api_key") :
-        return method.get("api_key")
+
+    if request.method:    
+        method = getattr(request, request.method)
+        if method.get("api_key") :
+            return method.get("api_key")
     return None
