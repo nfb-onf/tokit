@@ -7,23 +7,7 @@ from django.http import HttpResponse
 from django.utils import simplejson
 
 from tokit.models import Token, TokitPath
-
-
-def get_api_key(aKey) :
-    try :
-        token = Token.objects.get( key = aKey, is_valid=True )
-        return token
-    except Token.DoesNotExist :
-        return None
-
-def extract_api_key(request):
-    if request.META.get("HTTP_API_KEY") : # HTTP is dynamicaly added by django !@#$$!
-        return request.META.get("HTTP_API_KEY")
-    method = getattr(request, request.method)
-    if method.get("api_key") :
-        return method.get("api_key")
-    return None
-
+from tokit.key_manager import get_api_key, extract_api_key
 
 class APIAuthMiddleware(object):
     def process_request(self, request):

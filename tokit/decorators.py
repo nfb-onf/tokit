@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.utils import simplejson
 
 from tokit.models import Token
+from tokit.key_manager import get_api_key, extract_api_key
 
 def generate_json_error_msg(status, msg, key, method):
     return simplejson.dumps({
@@ -17,20 +18,10 @@ def generate_json_error_msg(status, msg, key, method):
                     'method' : method,
                 })
 
-def get_api_key(aKey) :
-    try :
-        token = Token.objects.get( key = aKey, is_valid=True )
-        return token
-    except Token.DoesNotExist :
-        return None
-
 def validate_token(permissions=[]) :
     def validate_decorator(func):
         def wrapper(request, *args, **kwargs) :
-            if request.method == "POST" :
-                API_key = request.POST.get("api_key", None)
-            else :
-                API_key = request.GET.get("api_key", None)
+            API_key = extract_api_key(request)
             key = get_api_key(API_key)
             
             if not key :

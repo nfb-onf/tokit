@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "tokit",
-    version = "0.1",
+    version = "0.2",
     packages=find_packages(),
     package_data = {'fixtures':['*.json']},
     install_requires =[],
