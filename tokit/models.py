@@ -3,7 +3,6 @@
 
 import uuid
 import datetime
-from sets import Set
 
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
@@ -37,7 +36,7 @@ class TokitPath(models.Model):
     path = models.CharField(max_length=255
                                ,unique=True
                                ,help_text="")
-    CACHE_KEYS = Set([])
+    CACHE_KEYS = set([])
     
     class Meta:
         abstract = True
@@ -76,7 +75,7 @@ def clean_tokit_path_cache(sender, instance, **kwargs):
     action = kwargs.get('action', 'post_save')
     map(lambda key: cache.delete(key), TokitPath.CACHE_KEYS)
     del TokitPath.CACHE_KEYS
-    TokitPath.CACHE_KEYS = Set([])
+    TokitPath.CACHE_KEYS = set([])
         
 class GlobalPathException(TokitPath):
     __doc__ = TOKITPATHDOC
