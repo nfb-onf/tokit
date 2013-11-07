@@ -10,6 +10,8 @@ from django.utils import simplejson
 from tokit.models import Token
 from tokit.key_manager import get_api_key, extract_api_key
 
+HTTP_UNAUTHORIZED = 401
+
 def generate_json_error_msg(status, msg, key, method):
     return simplejson.dumps({
                     "msg" : msg,
@@ -30,7 +32,7 @@ def validate_token(permissions=[]) :
                     ,API_key
                     ,request.method
                     )
-                return HttpResponse(json, mimetype='application/json')
+                return HttpResponse(json, mimetype='application/json', status=HTTP_UNAUTHORIZED)
 
             if key.has_all_permissions(permissions) and key.has_access():
                 return func( request, *args, **kwargs)
@@ -47,7 +49,7 @@ def validate_token(permissions=[]) :
                     ,API_key
                     ,request.method
                     )                
-            return HttpResponse(json, mimetype='application/json')
+            return HttpResponse(json, mimetype='application/json', status=HTTP_UNAUTHORIZED)
                             
         return wrapper
     return validate_decorator
